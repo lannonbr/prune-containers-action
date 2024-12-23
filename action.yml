@@ -8,5 +8,5 @@ inputs:
     description: "Name of the container"
     required: true
 runs:
-  using: "nodejs20"
+  using: "node20"
   main: "dist/index.js"
