@@ -1,0 +1,9 @@
+name: "Prune Containers"
+description: "Prunes old untagged containers from ghcr.io"
+inputs:
+  container-name:
+    description: "Name of the container"
+    required: true
+runs:
+  using: "nodejs20"
+  main: "dist/index.js"
