@@ -1,5 +1,8 @@
 name: "Prune Containers"
 description: "Prunes old untagged containers from ghcr.io"
+branding:
+  icon: anchor
+  color: blue
 inputs:
   container-name:
     description: "Name of the container"
