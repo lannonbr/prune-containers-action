@@ -2,14 +2,19 @@
   "name": "prune-containers-action",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "esbuild index.js --bundle --platform=node --target=node24 --format=cjs --minify --legal-comments=inline --outfile=dist/index.js"
+  },
   "keywords": [],
   "author": "Benjamin Lannon",
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.0",
-    "dayjs": "^1.11.13"
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1",
+    "dayjs": "^1.11.23"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

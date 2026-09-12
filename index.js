@@ -1,40 +1,48 @@
-const dayjs = require("dayjs");
-const core = require("@actions/core");
-const github = require("@actions/github");
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import dayjs from "dayjs";
 
 async function run() {
   const today = dayjs();
 
-  const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    throw new Error("GITHUB_TOKEN environment variable is required.");
+  }
 
-  const package_name = core.getInput("container-name", { required: true });
+  const octokit = github.getOctokit(token);
 
-  const versions =
-    await octokit.rest.packages.getAllPackageVersionsForPackageOwnedByAuthenticatedUser(
-      {
-        package_type: "container",
-        package_name,
-      }
-    );
+  const packageName = core.getInput("container-name", { required: true });
+
+  const versions = await octokit.paginate(
+    octokit.rest.packages.getAllPackageVersionsForPackageOwnedByAuthenticatedUser,
+    {
+      package_type: "container",
+      package_name: packageName,
+      per_page: 100,
+    }
+  );
 
   let versionsRemoved = 0;
 
-  for (const version of versions.data) {
+  for (const version of versions) {
     // delete untagged versions that are older than 7 days
     if (
       today.diff(dayjs(version.created_at), "days") > 7 &&
-      version.metadata.container.tags.length === 0
+      version.metadata?.container?.tags?.length === 0
     ) {
       await octokit.rest.packages.deletePackageVersionForAuthenticatedUser({
         package_type: "container",
-        package_name: package_name,
+        package_name: packageName,
         package_version_id: version.id,
       });
       versionsRemoved++;
     }
   }
 
-  console.log(`Image versions pruned: ${versionsRemoved}`);
+  core.info(`Image versions pruned: ${versionsRemoved}`);
 }
 
-run();
+run().catch((error) => {
+  core.setFailed(error instanceof Error ? error.message : String(error));
+});
